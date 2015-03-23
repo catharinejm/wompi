@@ -31,21 +31,28 @@
 //------------------------------------------------------------------------
 unsigned int uart_lcr ( void )
 {
-    return(GET32(AUX_MU_LSR_REG));
+    int x;
+    GET32(AUX_MU_LSR_REG,x);
+    return x;
 }
 //------------------------------------------------------------------------
 unsigned int uart_recv ( void )
 {
+    int x;
     while(1)
     {
-        if(GET32(AUX_MU_LSR_REG)&0x01) break;
+        GET32(AUX_MU_LSR_REG, x);
+        if(x&0x01) break;
     }
-    return(GET32(AUX_MU_IO_REG)&0xFF);
+    GET32(AUX_MU_IO_REG,x);
+    return(x&0xFF);
 }
 //------------------------------------------------------------------------
 unsigned int uart_check ( void )
 {
-    if(GET32(AUX_MU_LSR_REG)&0x01) return(1);
+    int x;
+    GET32(AUX_MU_LSR_REG, x);
+    if(x&0x01) return(1);
     return(0);
 }
 //------------------------------------------------------------------------
@@ -53,7 +60,9 @@ void uart_send ( unsigned int c )
 {
     while(1)
     {
-        if(GET32(AUX_MU_LSR_REG)&0x20) break;
+        int x;
+        GET32(AUX_MU_LSR_REG, x);
+        if(x&0x20) break;
     }
     PUT32(AUX_MU_IO_REG,c);
 }
@@ -62,7 +71,9 @@ void uart_flush ( void )
 {
     while(1)
     {
-        if((GET32(AUX_MU_LSR_REG)&0x100)==0) break;
+        int x;
+        GET32(AUX_MU_LSR_REG, x);
+        if((x&0x100)==0) break;
     }
 }
 //------------------------------------------------------------------------
@@ -103,7 +114,7 @@ void uart_init ( void )
     PUT32(AUX_MU_IER_REG,0);
     PUT32(AUX_MU_IIR_REG,0xC6);
     PUT32(AUX_MU_BAUD_REG,270);
-    ra=GET32(GPFSEL1);
+    GET32(GPFSEL1, ra);
     ra&=~(7<<12); //gpio14
     ra|=2<<12;    //alt5
     ra&=~(7<<15); //gpio15
@@ -127,7 +138,9 @@ void  timer_init ( void )
 //-------------------------------------------------------------------------
 unsigned int timer_tick ( void )
 {
-    return(GET32(ARM_TIMER_CNT));
+    int x;
+    GET32(ARM_TIMER_CNT, x);
+    return(x);
 }
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------

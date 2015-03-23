@@ -3,17 +3,19 @@
 #include "mailbox.h"
 
 void init_tty(void) {
-    fbinfo.width = 640;
-    fbinfo.height = 480;
-    fbinfo.virt_width = 640;
-    fbinfo.virt_height = 480;
-    fbinfo.pitch = 0;
-    fbinfo.bit_depth = 24;
-    fbinfo.x = 0;
-    fbinfo.y = 0;
-    fbinfo.ptr = NULL;
-    fbinfo.size = 0;
-
+    volatile struct fb_info fbinfo __attribute__ ((aligned (16))) = {
+        .width = 640,
+        .height = 480,
+        .virt_width = 640,
+        .virt_height = 480,
+        .pitch = 0,
+        .bit_depth = 24,
+        .x = 0,
+        .y = 0,
+        .ptr = NULL,
+        .size = 0,
+    };
+    
     while (1) {
         mailbox_write(&fbinfo, 1);
         if (mailbox_read(1) == 1)
@@ -22,7 +24,7 @@ void init_tty(void) {
     }
 
 
-    unsigned char *ltr = letters+0x36; // i got the BMP offset manually :-/
+    volatile unsigned char *ltr = letters+0x36; // i got the BMP offset manually :-/
     unsigned char *framebuffer = (unsigned char*)fbinfo.ptr - COREVID_OFFSET;
     int rowlen = fbinfo.width * fbinfo.bit_depth / 3;
     int ltr_rowlen = 128*3;
@@ -31,7 +33,7 @@ void init_tty(void) {
         framebuffer[i] = 0;
 
     for (int i = 0; i < 128; i++) {
-        for (int j = i*rowlen; j < i+ltr_rowlen; j++)
+        for (int j = i*rowlen; j < i*rowlen+ltr_rowlen; j++)
             framebuffer[j] = *ltr++;
     }
     

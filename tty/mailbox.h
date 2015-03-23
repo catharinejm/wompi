@@ -29,8 +29,7 @@ struct fb_info {
     unsigned int size;
 };
 
-extern volatile struct fb_info fbinfo;
-extern unsigned char *letters;
+volatile unsigned char letters[49206];
 
 int mailbox_write(volatile struct fb_info* fbinfo, unsigned int channel);
 unsigned int mailbox_read(unsigned int channel);

@@ -3,17 +3,17 @@
 
 #define NULL ((void*)0)
 
-#define PUT32(addr, val)                          \
-    *((unsigned int*)addr) = (unsigned int)(val)
+#define PUT32(addr, val)                                              \
+    asm volatile("str %0, [%1]" :: "r" (val), "r" (addr) : "memory")
 
-#define PUT16(addr, val)                              \
-    *((unsigned short*)addr) = (unsigned short)(val)
+#define PUT16(addr, val)                                                \
+    asm volatile("strh %0, [%1]" :: "r" (val), "r" (addr) : "memory")
 
-#define PUT8(addr, val)                             \
-    *((unsigned char*)addr) = (unsigned char)(val)
+#define PUT8(addr, val)                                                 \
+    asm volatile("strb %0, [%1]" :: "r" (val), "r" (addr) : "memory")
 
-#define GET32(addr) \
-    (*(unsigned int*)(addr))
+#define GET32(addr, out)                                    \
+    asm volatile("ldr %0, [%1]" : "=r" (out) : "r" (addr))
 
 #define barrier(...) \
     asm volatile("" ::: "memory")

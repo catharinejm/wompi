@@ -13,7 +13,7 @@ _start:
 hang: b hang
 
 .data
-  .comm fbinfo,40,4
+  .align 4
   .comm letters,49206
 	
   
