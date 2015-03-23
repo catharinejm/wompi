@@ -4,6 +4,8 @@ ARMGNU = arm-none-eabi
 COPTS = -Wall -g -O2 -std=gnu11 -nostdlib -nostartfiles -ffreestanding -mcpu=cortex-a7
 ASOPTS = -g -mcpu=cortex-a7
 
+TARGETS = prog.bin prog.list prog.elf
+
 CC = $(ARMGNU)-gcc $(COPTS)
 AS = $(ARMGNU)-as $(ASOPTS)
 
@@ -11,27 +13,22 @@ CSOURCES = $(wildcard *.c)
 SSOURCES = $(wildcard *.s)
 COBJS = $(CSOURCES:.c=.o)
 SOBJS = $(SSOURCES:.s=.o)
-OBJS = $(COBJS) $(SOBJS)
+OBJS =  $(SOBJS) $(COBJS)
 
-all : prog.bin
+all : $(TARGETS)
 
 clean :
-	rm -f *.o
-	rm -f *.bin
-	rm -f *.hex
-	rm -f *.elf
-	rm -f *.list
-	rm -f *.img
+	rm -f *.o $(TARGETS)
 
 
-kernel.img : loader $(OBJS)
+prog.bin : prog.elf
+	$(ARMGNU)-objcopy prog.elf -O binary prog.bin
+
+prog.elf: loader $(OBJS)
 	$(ARMGNU)-ld $(OBJS) -T loader -o prog.elf
-	$(ARMGNU)-objdump -D prog.elf > prog.list
-	$(ARMGNU)-objcopy prog.elf -O ihex prog.hex
-	$(ARMGNU)-objcopy prog.elf -O binary kernel.img
 
-prog.bin: kernel.img
-	cp kernel.img prog.bin
+prog.list: prog.elf
+	$(ARMGNU)-objdump -D prog.elf > prog.list
 
 install : gcc
 	rm -f /Volumes/RPI/kernel.img

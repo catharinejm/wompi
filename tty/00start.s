@@ -5,13 +5,12 @@
 .align 2
 
 
-.text
-  .subsection .start
+.text 0
   .globl _start
 _start:
   ldr sp,=stacktop
   bl wombat
-hapng: b hang
+hang: b hang
 
 .data
   .comm fbinfo,40,4
