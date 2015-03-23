@@ -25,11 +25,11 @@ struct fb_info {
         bit_depth,
         x,
         y;
-    void *ptr;
+    void * volatile ptr;
     unsigned int size;
 };
 
-volatile unsigned char letters[49206];
+const unsigned char letters[49206];
 
 int mailbox_write(volatile struct fb_info* fbinfo, unsigned int channel);
 unsigned int mailbox_read(unsigned int channel);

@@ -24,17 +24,19 @@ void init_tty(void) {
     }
 
 
-    volatile unsigned char *ltr = letters+0x36; // i got the BMP offset manually :-/
-    unsigned char *framebuffer = (unsigned char*)fbinfo.ptr - COREVID_OFFSET;
-    int rowlen = fbinfo.width * fbinfo.bit_depth / 3;
+    const unsigned char *ltr = letters+0x36; // i got the BMP offset manually :-/
+    volatile unsigned char *framebuffer = (unsigned char*)fbinfo.ptr - COREVID_OFFSET;
+    int rowlen = fbinfo.width * fbinfo.bit_depth / 8;
     int ltr_rowlen = 128*3;
+    int rows = 90;
 
     for (int i = 0; i < fbinfo.size; i++)
         framebuffer[i] = 0;
 
-    for (int i = 0; i < 128; i++) {
-        for (int j = i*rowlen; j < i*rowlen+ltr_rowlen; j++)
+    for (int i = 0; i < rows; i++) {
+        for (int j = i*rowlen; j < i*rowlen+ltr_rowlen; j++) {
             framebuffer[j] = *ltr++;
+        }
     }
     
 }
