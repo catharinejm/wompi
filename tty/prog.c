@@ -1,9 +1,12 @@
 #include "tty.h"
 #include "periph.h"
+#include "types.h"
 
 int wombat (void) {
-    // uart_init();
-    // timer_init();
-    init_tty();
+    struct console con;
+    
+    uart_init();
+    timer_init();
+    tty_init(&con);
     return 0;
 }

@@ -1,7 +1,7 @@
 
 ARMGNU = arm-none-eabi
 
-COPTS = -Wall -g -O2 -std=gnu11 -nostdlib -nostartfiles -ffreestanding -mcpu=cortex-a7
+COPTS = -Wall -ggdb -O2 -std=gnu11 -nostdlib -nostartfiles -ffreestanding -mcpu=cortex-a7
 ASOPTS = -g -mcpu=cortex-a7
 
 TARGETS = prog.bin prog.list prog.elf

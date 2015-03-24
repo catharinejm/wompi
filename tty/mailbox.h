@@ -2,6 +2,7 @@
 #define _MAILBOX_H_
 
 #include "bcm2806.h"
+#include "types.h"
 
 #define MAILBOX_BASE PERI_BASE + 0xB880
 #define MAIL0_READ MAILBOX_BASE + 0x00
@@ -29,7 +30,7 @@ struct fb_info {
     unsigned int size;
 };
 
-const unsigned char letters[49206];
+const byte_t letters[49206];
 
 int mailbox_write(volatile struct fb_info* fbinfo, unsigned int channel);
 unsigned int mailbox_read(unsigned int channel);
