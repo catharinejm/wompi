@@ -2,12 +2,12 @@
 
 dir = File.expand_path File.join(__FILE__, "..")
 
-font = File.read(File.expand_path(File.join(__FILE__, "..", "dos_spaced.bin"))).chars.drop(0x36)
+font = File.read(File.join(dir, "dos_spaced.bin")).chars.drop(0x36)
 
 let = ->(n) {
   l=[];
   15.times do |m|
-    l += font.drop(n/16*384*15).drop((n%16)*24).drop(m*384).take(24)
+    l += font.drop((n/16)*384*15 + (n%16)*24 + m*384).take(24)
   end
   l
 }
