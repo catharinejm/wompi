@@ -3,6 +3,7 @@
 //-------------------------------------------------------------------------
 
 #include "mem.h"
+#include "types.h"
 
 #define ARM_TIMER_CTL 0x3F00B408
 #define ARM_TIMER_CNT 0x3F00B420
@@ -38,7 +39,7 @@ unsigned int uart_lcr ( void )
 //------------------------------------------------------------------------
 unsigned int uart_recv ( void )
 {
-    int x;
+    u32 x;
     while(1)
     {
         GET32(AUX_MU_LSR_REG, x);
