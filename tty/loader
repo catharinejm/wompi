@@ -3,7 +3,8 @@ MEMORY
 {
     ram : ORIGIN = 0x9000, LENGTH = 0x20000
 }
-stacktop = LENGTH(ram) - ORIGIN(ram) - 4;
+letters = LENGTH(ram) + ORIGIN(ram);
+stacktop = letters + 11280;
 
 SECTIONS
 {

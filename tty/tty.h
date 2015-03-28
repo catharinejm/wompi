@@ -4,8 +4,8 @@
 #include "types.h"
 #include "mailbox.h"
 
-#define PXWIDTH 3
-#define BIT_DEPTH 24
+#define PXWIDTH 1
+#define BIT_DEPTH 8
 
 #define CHAR_HEIGHT 15
 #define CHAR_WIDTH 8
@@ -33,8 +33,8 @@
 
 struct console {
     char *prompt;
-    const byte_t *letters;
-    volatile byte_t *framebuffer;
+    const u8 *letters;
+    volatile u8 *framebuffer;
     int row,
         last_row,
         col,

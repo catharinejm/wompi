@@ -18,7 +18,7 @@
 #define MAIL_EMPTY (1 << 30)
 
 struct fb_info {
-    unsigned int width,
+    u32 width,
         height,
         virt_width,
         virt_height,
@@ -27,10 +27,11 @@ struct fb_info {
         x,
         y;
     void * volatile ptr;
-    unsigned int size;
+    u32 size;
+    u16 cmap[256];
 };
 
-const byte_t letters[49206];
+extern const u8 letters[];
 
 int mailbox_write(volatile struct fb_info* fbinfo, unsigned int channel);
 unsigned int mailbox_read(unsigned int channel);

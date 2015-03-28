@@ -30,7 +30,7 @@ void tty_write(struct console *con, char c) {
         
         
         int coff = cidx*CHAR_SIZE;
-        const byte_t *let = con->letters+coff;
+        const u8 *let = con->letters+coff;
         for (int i = 0; i < CHAR_HEIGHT; i++) {
             for (int j = 0; j < CHAR_PXWIDTH; j++)
                 con->framebuffer[fb_start+j+i*fb_row_len] = *let++;
@@ -65,6 +65,8 @@ void tty_init(struct console *con) {
     con->fbinfo.y = 0;
     con->fbinfo.ptr = NULL;
     con->fbinfo.size = 0;
+    con->fbinfo.cmap[0] = 0;
+    con->fbinfo.cmap[255] = 0xFFFF;
     
     while (1) {
         mailbox_write(&con->fbinfo, 1);
@@ -76,8 +78,8 @@ void tty_init(struct console *con) {
 
 
     con->prompt = "> ";
-    con->letters = letters;//+0x36;
-    con->framebuffer = (byte_t*)con->fbinfo.ptr - COREVID_OFFSET;
+    con->letters = letters;
+    con->framebuffer = (u8*)con->fbinfo.ptr - COREVID_OFFSET;
     con->row = 0;
     con->last_row = con->fbinfo.height / 15; // 15px is char height
     con->col = 2; // start after prompt
