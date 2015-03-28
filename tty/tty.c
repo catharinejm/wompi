@@ -26,17 +26,14 @@ void tty_write(struct console *con, char c) {
         int cidx = c - '!';
 
         int fb_row_len = con->fbinfo.width * PXWIDTH;
-
-        int ctop = cidx / BITMAP_COLS * CHAR_HEIGHT * BITMAP_PXWIDTH;
-        int cleft = cidx % BITMAP_COLS * CHAR_PXWIDTH;
-        int cstart = ctop+cleft;
-
         int fb_start = con->row*fb_row_len*CHAR_HEIGHT + con->col*CHAR_PXWIDTH;
         
         
+        int coff = cidx*CHAR_SIZE;
+        const byte_t *let = con->letters+coff;
         for (int i = 0; i < CHAR_HEIGHT; i++) {
             for (int j = 0; j < CHAR_PXWIDTH; j++)
-                con->framebuffer[fb_start+j+i*fb_row_len] = con->letters[cstart+j+i*BITMAP_PXWIDTH];
+                con->framebuffer[fb_start+j+i*fb_row_len] = *let++;
         }
         INC_COL(con);
     } else if (c == ' ' || c == '\t') { // one space for tabs, i guess...
@@ -79,12 +76,13 @@ void tty_init(struct console *con) {
 
 
     con->prompt = "> ";
-    con->letters = letters+0x36;
+    con->letters = letters;//+0x36;
     con->framebuffer = (byte_t*)con->fbinfo.ptr - COREVID_OFFSET;
     con->row = 0;
     con->last_row = con->fbinfo.height / 15; // 15px is char height
     con->col = 2; // start after prompt
     con->last_col = con->fbinfo.width / 8; // 8px is char width
+
 
     tty_clear(con);
     tty_write_str(con, "Welcome to Wombat!\n");
