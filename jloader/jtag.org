@@ -1,0 +1,22 @@
+* Pinout
+| Color  | JT Pin | RPi Pin | JT Sig |   GPIO |   ALT | NOTE                             |
+| Brown  |      1 |       1 | VREF   |        |       |                                  |
+| Red    |      3 |      15 | nTRST  |     22 |     4 |                                  |
+| Orange |      4 |      39 | GND    |        |       |                                  |
+| Yellow |      5 |      37 | TDI    | 26 / 4 | 4 / 5 |                                  |
+| Green  |      7 |      13 | TMS    |     27 |     4 |                                  |
+| Blue   |      9 |      22 | TCK    |     25 |     4 |                                  |
+| Purple |     11 |      16 | RTCK   |     23 |     4 | Doesn't work! Connnect to Ground |
+| Grey   |     13 |      18 | TDO    |     24 |     4 |                                  |
+
+
+
+
+* Check
+| JT Pin | GPIO | Status | Again |
+|      3 |   22 | PASS   | PASS  |
+|      5 |   26 | PASS   | PASS  |
+|      7 |   27 | PASS   | PASS  |
+|      9 |   25 | PASS   | PASS  |
+|     11 |   23 | PASS   | PASS  |
+|     13 |   24 | PASS   | PASS  |
