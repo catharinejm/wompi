@@ -21,26 +21,75 @@ void tty_write_str(struct console *con, char *str) {
         tty_write(con, *c);
 }
 
+/* assumes 8-bit color */
+static inline void tty_paint_char(struct console *con, const void *let) {
+    int fb_start = con->row*con->fbinfo.pitch*CHAR_HEIGHT + con->col*CHAR_PXWIDTH;
+    volatile u32 *pix = (u32*)(con->framebuffer + fb_start);
+    int inc = (con->fbinfo.pitch - 4) >> 2;
+    u32 cnt = 0;
+    const u32* let32 = let;
+    if (NULL == let) {
+        for (;cnt < 15; cnt++) {
+            (*pix++) = 0;
+            *pix = 0;
+            pix += inc;
+        }
+    } else {
+        for (; cnt < 15; cnt++) {
+            (*pix++) = *let32++;
+            *pix = *let32++;
+            pix += inc;
+        }
+    }
+    // if (NULL == let) {
+    //     asm volatile("mov r0, #0 \n"
+    //                  "mov r1, #0"
+    //                  ::: "r0", "r1");
+    //     while (cnt < 15) {
+    //         asm volatile ("stm %[pix], {r0,r1} \n"
+    //                       "add %[pix], %[inc] \n"
+    //                       "add %[cnt], #1 \n"
+    //                       : [pix] "+r" (pix), [cnt] "+r" (cnt)
+    //                       : [inc] "r" (inc)
+    //                       : "memory", "r0", "r1");
+    //     }
+    // } else {
+    //     while (cnt < 7) {
+    //         asm volatile ("ldm %[let], {r0,r1,r2,r3} \n"
+    //                       "stm %[pix], {r0,r1} \n"
+    //                       "add %[pix], %[inc] \n"
+    //                       "stm %[pix], {r2,r3} \n"
+    //                       "add %[cnt], #1 \n"
+    //                       "cmp %[cnt], #7 \n"
+    //                       : [pix] "+r" (pix), [let] "+r" (let), [cnt] "+r" (cnt)
+    //                       : [inc] "r" (inc)
+    //                       : "memory", "r0", "r1", "r2", "r3", "cc");
+    //     }
+    //     asm volatile("ldm %[let], {r0,r1} \n"
+    //                  "stm %[pix], {r0,r1}"
+    //                  : [pix] "+r" (pix), [let] "+r" (let)
+    //                  :
+    //                  : "memory", "r0", "r1");
+
+    // }
+}
+
 void tty_write(struct console *con, char c) {
     if (c >= '!' && c <= '~') {
         int cidx = c - '!';
-
-        int fb_row_len = con->fbinfo.width * PXWIDTH;
-        int fb_start = con->row*fb_row_len*CHAR_HEIGHT + con->col*CHAR_PXWIDTH;
-        
-        
         int coff = cidx*CHAR_SIZE;
-        const u8 *let = con->letters+coff;
-        for (int i = 0; i < CHAR_HEIGHT; i++) {
-            for (int j = 0; j < CHAR_PXWIDTH; j++)
-                con->framebuffer[fb_start+j+i*fb_row_len] = *let++;
-        }
+        tty_paint_char(con, con->letters+coff);
         INC_COL(con);
     } else if (c == ' ' || c == '\t') { // one space for tabs, i guess...
         INC_COL(con);
-    } else if (c == '\n') {
+    } else if (c == '\r' || c == '\n') {
         INC_ROW(con);
         tty_write_str(con, con->prompt);
+    } else if (c == '\b') {
+        if (0 < con->col) {
+            con->col--;
+            tty_paint_char(con, NULL);
+        }
     }
 }
 
