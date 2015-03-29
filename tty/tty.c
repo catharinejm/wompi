@@ -6,13 +6,12 @@
 void tty_scroll(struct console *con) {
     int row_len = con->fbinfo.width * PXWIDTH;
     int row_area = row_len * CHAR_HEIGHT;
-    int i;
-    for (i = 0; i < con->fbinfo.size - row_area; i++) {
-        con->framebuffer[i] = con->framebuffer[i+row_area];
-    }
-    for (; i < con->fbinfo.size; i++) {
-        con->framebuffer[i] = 0;
-    }
+    volatile u32 *to = con->framebuffer32;
+    union px_v from = { con->framebuffer + row_area };
+    while (from.p32 < con->fb_end32)
+        (*to++) = *from.p32++;
+    while (to < con->fb_end32)
+        (*to++) = 0;
     con->row--;
 }
 
@@ -85,7 +84,7 @@ void tty_write(struct console *con, char c) {
     } else if (c == '\r' || c == '\n') {
         INC_ROW(con);
         tty_write_str(con, con->prompt);
-    } else if (c == '\b') {
+    } else if (c == '\b' || c == 127) {
         if (0 < con->col) {
             con->col--;
             tty_paint_char(con, NULL);
@@ -94,8 +93,9 @@ void tty_write(struct console *con, char c) {
 }
 
 void tty_clear(struct console *con) {
-    for (int i = 0; i < con->fbinfo.size; i++)
-        con->framebuffer[i] = 0;
+    union px_v fb = { con->framebuffer };
+    while (fb.p32 < con->fb_end32)
+        (*fb.p32++) = 0;
     con->row=0;
     con->col=0;
     char *p = con->prompt;
@@ -129,6 +129,7 @@ void tty_init(struct console *con) {
     con->prompt = "> ";
     con->letters = letters;
     con->framebuffer = (u8*)con->fbinfo.ptr - COREVID_OFFSET;
+    con->fb_end = con->framebuffer + con->fbinfo.size;
     con->row = 0;
     con->last_row = con->fbinfo.height / 15; // 15px is char height
     con->col = 2; // start after prompt

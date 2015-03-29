@@ -35,6 +35,11 @@ struct console {
         volatile u16 *framebuffer16;
         volatile u32 *framebuffer32;
     };
+    union {
+        volatile u8 *fb_end;
+        volatile u16 *fb_end16;
+        volatile u32 *fb_end32;
+    };
     int row,
         last_row,
         col,
