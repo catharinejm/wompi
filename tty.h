@@ -27,6 +27,15 @@
             tty_scroll(con);                    \
     } while (0)
 
+#define ROW_AREA(con)                             \
+    (con->row * con->fbinfo.pitch * CHAR_HEIGHT)
+
+#define COL_OFFSET(con)                         \
+    (con->col * CHAR_PXWIDTH)
+
+#define CHAR_TOPLEFT(con)                                 \
+    ((con->framebuffer) + ROW_AREA(con) + COL_OFFSET(con))
+
 struct console {
     char *prompt;
     const u8 *letters;

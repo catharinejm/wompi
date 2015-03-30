@@ -4,10 +4,8 @@
 #include "types.h"
 
 void tty_scroll(struct console *con) {
-    int row_len = con->fbinfo.width * PXWIDTH;
-    int row_area = row_len * CHAR_HEIGHT;
     volatile u32 *to = con->framebuffer32;
-    union px_v from = { con->framebuffer + row_area };
+    union px_v from = { con->framebuffer + ROW_AREA(con) };
     while (from.p32 < con->fb_end32)
         (*to++) = *from.p32++;
     while (to < con->fb_end32)
@@ -22,55 +20,25 @@ void tty_write_str(struct console *con, char *str) {
 
 /* assumes 8-bit color */
 static inline void tty_paint_char(struct console *con, const void *let) {
-    int fb_start = con->row*con->fbinfo.pitch*CHAR_HEIGHT + con->col*CHAR_PXWIDTH;
-    volatile u32 *pix = (u32*)(con->framebuffer + fb_start);
-    int inc = (con->fbinfo.pitch - 4) >> 2;
-    u32 cnt = 0;
+    union px_v pix = { CHAR_TOPLEFT(con) };
+
+    // 2 4-byte words written per line of character. pix is incremented after first write,
+    // so pitch - 1 words remain after second write
+    int row_incr = (con->fbinfo.pitch / 4) - 1;
     const u32* let32 = let;
     if (NULL == let) {
-        for (;cnt < 15; cnt++) {
-            (*pix++) = 0;
-            *pix = 0;
-            pix += inc;
+        for (int cnt = 0;cnt < CHAR_HEIGHT; cnt++) {
+            (*pix.p32++) = 0;
+            *pix.p32 = 0;
+            pix.p32 += row_incr;
         }
     } else {
-        for (; cnt < 15; cnt++) {
-            (*pix++) = *let32++;
-            *pix = *let32++;
-            pix += inc;
+        for (int cnt = 0; cnt < CHAR_HEIGHT; cnt++) {
+            (*pix.p32++) = *let32++;
+            *pix.p32 = *let32++;
+            pix.p32 += row_incr;
         }
     }
-    // if (NULL == let) {
-    //     asm volatile("mov r0, #0 \n"
-    //                  "mov r1, #0"
-    //                  ::: "r0", "r1");
-    //     while (cnt < 15) {
-    //         asm volatile ("stm %[pix], {r0,r1} \n"
-    //                       "add %[pix], %[inc] \n"
-    //                       "add %[cnt], #1 \n"
-    //                       : [pix] "+r" (pix), [cnt] "+r" (cnt)
-    //                       : [inc] "r" (inc)
-    //                       : "memory", "r0", "r1");
-    //     }
-    // } else {
-    //     while (cnt < 7) {
-    //         asm volatile ("ldm %[let], {r0,r1,r2,r3} \n"
-    //                       "stm %[pix], {r0,r1} \n"
-    //                       "add %[pix], %[inc] \n"
-    //                       "stm %[pix], {r2,r3} \n"
-    //                       "add %[cnt], #1 \n"
-    //                       "cmp %[cnt], #7 \n"
-    //                       : [pix] "+r" (pix), [let] "+r" (let), [cnt] "+r" (cnt)
-    //                       : [inc] "r" (inc)
-    //                       : "memory", "r0", "r1", "r2", "r3", "cc");
-    //     }
-    //     asm volatile("ldm %[let], {r0,r1} \n"
-    //                  "stm %[pix], {r0,r1}"
-    //                  : [pix] "+r" (pix), [let] "+r" (let)
-    //                  :
-    //                  : "memory", "r0", "r1");
-
-    // }
 }
 
 void tty_write(struct console *con, char c) {
